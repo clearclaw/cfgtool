@@ -1,0 +1,21 @@
+{
+  "var1": "var1",
+  "db": {
+    "db1": {
+      "host": "db1_host",
+      "user": "db1_user",
+      "pw": "db1_pass"
+    },
+    "db3": {
+      "host": "db1_host",
+      "user": "db1_user",
+      "pw": "db1_pass"
+    },
+    "db2": {
+      "host": "db2_host",
+      "user": "db2_user",
+      "pw": "db2_pass"
+    }
+  },
+  "var2": "var1"
+}
