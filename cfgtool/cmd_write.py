@@ -12,8 +12,7 @@ class Action (CmdBase):
     if not self.conf.force:
       self.error ("Must force writes (--force).")
       clip.exit (err = True)
-    return process_cfgs (self.conf.templ_ext, "", self.make_file)
-    rc = process_cfgs (self.conf.templ_ext, "", self.make_file)
-    if rc:
-      self.err ("%d errors" % err)
+    rc = self.process_cfgs ("Generate...",
+                            self.conf.templ_ext, "",
+                            self.make_file)
     clip.exit (err = (True if rc else False))

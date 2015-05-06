@@ -5,38 +5,57 @@ from cfgtool.main import app_main, CONFIG
 from cfgtool.cmdbase import implementation
 
 LOG = logging.getLogger (__name__)
+OPTIONS = ["help", "workdir", "moduledir", "beliefdir", "nobackup", "debug",
+               "force", "nocolour", "quiet", "verbose",]
 
 @app_main.subcommand (
   name = "check",
-  description = "Check currency of configuration files")
+  description = "Check currency of configuration files",
+  inherits = OPTIONS)
+@clip.arg ("module", required = True,
+           help = "Module to process")
 @logtool.log_call
-def check ():
-  implementation ("check", CONFIG)
+def check (module):
+  rc = implementation ("check", module = module)
+  if rc:
+    clip.exit (err = True)
 
 @app_main.subcommand (
   name = "clean",
-  description = "Remove old backups")
+  description = "Remove old backups",
+  inherits = OPTIONS)
 @logtool.log_call
 def clean ():
-  implementation ("clean", CONFIG)
+  implementation ("clean")
 
 @app_main.subcommand (
   name = "sample",
-  description = "Generate sample configuration files")
+  description = "Generate sample configuration files",
+  inherits = OPTIONS)
+@clip.arg ("module", required = True,
+           help = "Module to process")
 @logtool.log_call
-def sample ():
-  implementation ("sample", CONFIG)
+def sample (module):
+  implementation ("sample", module = module)
 
 @app_main.subcommand (
   name = "status",
-  description = "Report status of configuration files")
+  description = "Report status of configuration files",
+  inherits = OPTIONS)
 @logtool.log_call
 def status ():
-  implementation ("status", CONFIG)
+  rc = 0
+  for module in sorted ([f.basename () for f in CONFIG.module_dir.glob ("*")]):
+    rc += implementation ("check", module = module)
+  if rc:
+    clip.exit (err = True)
 
 @app_main.subcommand (
   name = "write",
-  description = "Write new configuration files (requires --force)")
+  description = "Write new configuration files (requires --force)",
+  inherits = OPTIONS)
+@clip.arg ("module", required = True,
+           help = "Module to process")
 @logtool.log_call
-def write ():
-  implementation ("write", CONFIG)
+def write (module):
+  implementation ("write", module = module)

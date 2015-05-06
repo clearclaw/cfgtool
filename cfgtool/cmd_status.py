@@ -2,6 +2,7 @@
 
 import clip, logging, logtool
 from cfgtool.cmdbase import CmdBase
+from cfgtool.cmd_check import Action
 
 LOG = logging.getLogger (__name__)
 
@@ -9,6 +10,6 @@ class Action (CmdBase):
 
   @logtool.log_call
   def run (self):
-    for fname in self.cfgs:
-      for f in fname.dirname ().glob ("%s.%s*" % (fname.basename (), ext)):
-        f.remove ()
+    for module in self.cfgs:
+      rc = Action (module).run ()
+    clip.exit (err = (True if rc else False))

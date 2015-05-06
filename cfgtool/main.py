@@ -5,14 +5,16 @@ from functools import partial
 from socket import gethostname
 from addict import Dict
 from path import path
-from configobj import ConfigObj
 
 LOG = logging.getLogger (__name__)
 
 APP = clip.App ()
 PROCESS_UTTIME, PROCESS_STRTIME = logtool.now (slug = True)
+DEFAULT_CONFIGFILE = "cfgtool.conf"
+DEFAULT_BELIEFDIR = "etc/cfgtool/belief.d"
+DEFAULT_MODULEDIR = "etc/cfgtool/module.d"
+DEFAULT_WORKDIR = "/"
 CONFIG = Dict ({
-  "cfgtool_dir": path (DEFAULT_CFGTOOLDIR),
   "debug": False,
   "templ_ext": ".templ",
   "belief_ext": ".json",
@@ -23,22 +25,13 @@ CONFIG = Dict ({
   "time_ut": PROCESS_UTTIME,
   "time_str": PROCESS_STRTIME,
 })
-DEFAULT_CFGTOOLDIR = path ("/etc/cfgtool")
-DEFAULT_CONFIGFILE = "cfgtool.conf"
-DEFAULT_BELIEFDIR = DEFAULT_CFGTOOLDIR / "belief.d"
-DEFAULT_BELIEFEXT = ".belief"
-DEFAULT_MODDIR = DEFAULT_CFGTOOLDIR / "modules.d"
-DEFAULT_MODEXT = ".cfgs"
-DEFAULT_WORKDIR = "/"
+
+class CmdError (Exception):
+  pass
 
 @logtool.log_call
 def option_setopt (option, value):
   CONFIG[option] = value
-
-@logtool.log_call
-def option_module (value):
-  CONFIG.module = value
-  CONFIG.cfgs_file = CONFIG.modules_dir / "%s.cfgs" % value
 
 @logtool.log_call
 def option_logging (flag):
@@ -49,61 +42,63 @@ def option_logging (flag):
            description = "cfgtool",
            tree_view = "-H")
 @clip.flag ('-H', '--HELP', hidden = True, help = "Help for all sub-commands")
-@clip.opt ("-c", "--cfgtooldir", name = "ct_dir",
-           help =  "Cfgtool directory root to use.",
-           default = DEFAULT_CFGTOOLDIR, hidden = True, inherit_only = True,
-           callback = partial (option_setopt, "cfgtool_dir"))
-@clip.opt ("-w", "--workdir", name = "work_dir",
-           help = "Working root directory to use.",
-           default = DEFAULT_WORKDIR, hidden = True, inherit_only = True,
-           callback = partial (option_setopt, "work_dir"))
-@clip.opt ("-m", "--module", name = "module",
-           help = "Module to localise for (required)",
-           hidden = True, inherit_only = True, callback = option_module)
-@clip.opt ("-t", "--target", name = "target",
-           help = "Target host(name) to localise for",
-           default = gethostname (), hidden = True, inherit_only = True,
-           callback = partial (option_setopt, "target"))
-@clip.flag ("-b", "--nobackup", name = "nobackup",
+@clip.flag ("-b", "--nobackup",
             help = "Disable backups of touched files",
             default = False, hidden = True, inherit_only = True,
             callback = partial (option_setopt, "nobackup"))
-@clip.flag ("-D", "--debug", name = "debug", help = "Enable debug logging",
-            default = False, hidden = True, inherit_only = True,
-            callback = option_logging)
-@clip.flag ("-f", "--force", name = "force", help = "Don't stop at errors",
+@clip.flag ("-f", "--force", help = "Don't stop at errors",
             default = False, hidden = True, inherit_only = True,
             callback = partial (option_setopt, "force"))
-@clip.flag ("-C", "--nocolour", name = "nocolour",
+@clip.opt ("-W", "--workdir",
+           help = "Working root directory to use.",
+           default = DEFAULT_WORKDIR, hidden = True, inherit_only = True,
+           callback = partial (option_setopt, "work_dir"))
+@clip.opt ("-M", "--moduledir",
+           help = "Module directory to use.",
+           default = DEFAULT_WORKDIR + DEFAULT_MODULEDIR, hidden = True,
+           inherit_only = True,
+           callback = partial (option_setopt, "module__dir"))
+@clip.opt ("-B", "--beliefdir",
+           help = "Belief directory to use.",
+           default = DEFAULT_WORKDIR + DEFAULT_BELIEFDIR, hidden = True,
+           inherit_only = True, callback = partial (option_setopt, "belief_dir"))
+@clip.flag ("-D", "--debug",
+            help = "Enable debug logging",
+            default = False, hidden = True, inherit_only = True,
+            callback = option_logging)
+@clip.flag ("-C", "--nocolour",
             help = "Suppress colours in reports",
             default = False, hidden = True, inherit_only = True,
             callback = partial (option_setopt, "nocolour"))
-@clip.flag ("-q", "--quiet", name = "quiet", help = "Suppress output",
+@clip.flag ("-q", "--quiet",
+            help = "Suppress output",
             default = False, hidden = True, inherit_only = True,
             callback = partial (option_setopt, "quiet"))
+@clip.flag ("-v", "--verbose",
+            help = "Verbose output (see variable mappings)",
+            default = False, hidden = True, inherit_only = True,
+            callback = partial (option_setopt, "verbose"))
 @logtool.log_call
 def app_main (*args, **kwargs): # pylint: disable = W0613
   if not sys.stdout.isatty ():
     option_setopt ("nocolour", True)
+  CONFIG.work_dir = path (CONFIG.get ("work_dir", DEFAULT_WORKDIR))
+  CONFIG.module_dir = path (CONFIG.get ("module_dir",
+                                        CONFIG.work_dir / DEFAULT_MODULEDIR))
+  CONFIG.belief_dir = path (CONFIG.get ("belief_dir",
+                                        CONFIG.work_dir / DEFAULT_BELIEFDIR))
 
 @logtool.log_call
 def main ():
   try:
-    conf = ConfigObj (self.conf.cfgtool_dir / DEFAULT_CONFIGFILE,
-                      interpolation = False)
-  except: # pylint: disable = W0702
-    conf = {}
-  CONFIG.modules_dir = path (conf.get ("modules_dir", DEFAULT_MODULEDIR))
-  CONFIG.belief_dir = path (conf.get ("belief_dir", DEFAULT_BELIEFDIR))
-  CONFIG.work_dir = path (conf.get ("work_dir", DEFAULT_WORKDIR))
-  try:
     APP.run ()
-  except KeyboardInterrupt:
-    pass
-  except clip.ClipExit:
-    pass
+  except clip.ClipExit as e:
+    sys.exit (1 if e.status else 0)
+  except (CmdError, KeyboardInterrupt):
+    sys.exit (2)
   except Exception as e:
     logtool.log_fault (e)
+    sys.exit (3)
 
 if __name__ == "__main__":
   main()

@@ -5,6 +5,7 @@ from addict import Dict
 
 LOG = logging.getLogger (__name__)
 COLOUR_ERROR = "red"
+COLOUR_DEBUG = "blue"
 COLOUR_INFO = "white"
 COLOUR_INFO_BAD = "magenta"
 COLOUR_WARN = "yellow"
@@ -16,7 +17,7 @@ class CmdIO (object):
 
   @logtool.log_call
   def __init__ (self, *args, **kwargs):
-    self.conf = Dict {}
+     self.conf = Dict ()
 
   @logtool.log_call
   def exit_if_forced (self, msg = None):
@@ -32,14 +33,20 @@ class CmdIO (object):
             else msg)
 
   @logtool.log_call
+  def debug (self, msg):
+    if not self.conf.quiet and self.conf.verbose:
+      clip.echo (self.colourise (msg, COLOUR_DEBUG))
+
+  @logtool.log_call
   def info (self, msg, err = False):
-    clip.echo (self.colourise ("INFO: " + msg, COLOUR_INFO if not err
-                               else COLOUR_INFO_BAD))
+    if not self.conf.quiet:
+      clip.echo (self.colourise (msg,
+                                 COLOUR_INFO if not err else COLOUR_INFO_BAD))
 
   @logtool.log_call
   def error (self, msg):
     if not self.conf.quiet:
-      clip.echo (self.colourise ("Error: " + msg, COLOUR_ERROR))
+      clip.echo (self.colourise (msg, COLOUR_ERROR))
 
   @logtool.log_call
   def warn (self, msg):
@@ -54,7 +61,8 @@ class CmdIO (object):
 
   @logtool.log_call
   def report_field (self, field, value, err = False):
-    clip.echo ("%s: %s" % (
-      self.colourise (field, COLOUR_FIELDNAME),
-      self.colourise (value,
-                      COLOUR_VALUE if not err else COLOUR_ERROR),))
+    if not self.conf.quiet:
+      clip.echo ("%s: %s" % (
+        self.colourise (field, COLOUR_FIELDNAME),
+        self.colourise (value,
+                        COLOUR_VALUE if not err else COLOUR_ERROR),))
