@@ -5,21 +5,23 @@ from functools import partial
 from socket import gethostname
 from addict import Dict
 from path import path
+from configobj import ConfigObj
 
 LOG = logging.getLogger (__name__)
 
 APP = clip.App ()
 PROCESS_UTTIME, PROCESS_STRTIME = logtool.now (slug = True)
-DEFAULT_CONFIGFILE = "cfgtool.conf"
+DEFAULT_CONFIGFILE = "etc/cfgtool/cfgtool.conf"
 DEFAULT_BELIEFDIR = "etc/cfgtool/belief.d"
 DEFAULT_MODULEDIR = "etc/cfgtool/module.d"
 DEFAULT_WORKDIR = "/"
 CONFIG = Dict ({
+  "nobackup": False,
   "debug": False,
   "templ_ext": ".templ",
   "belief_ext": ".json",
-  "backup_ext": ".backup",
-  "check_ext": ".check",
+  "backup_ext": "-backup",
+  "check_ext": "-check",
   "out_ext": "",
   "sample_ext": ".sample",
   "time_ut": PROCESS_UTTIME,
@@ -57,7 +59,7 @@ def option_logging (flag):
            help = "Module directory to use.",
            default = DEFAULT_WORKDIR + DEFAULT_MODULEDIR, hidden = True,
            inherit_only = True,
-           callback = partial (option_setopt, "module__dir"))
+           callback = partial (option_setopt, "module_dir"))
 @clip.opt ("-B", "--beliefdir",
            help = "Belief directory to use.",
            default = DEFAULT_WORKDIR + DEFAULT_BELIEFDIR, hidden = True,
@@ -90,6 +92,12 @@ def app_main (*args, **kwargs): # pylint: disable = W0613
 
 @logtool.log_call
 def main ():
+  try:
+    cfg = ConfigObj (DEFAULT_WORKDIR + DEFAULT_CONFIGFILE, interpolation = False)
+    CONFIG.update (dict (cfg))
+  except: # pylint: disable-msg = W0702
+    print >> sys.stderr,  "Unable to parse configfile: %s" % DEFAULT_CONFIGFILE
+    sys.exit (9)
   try:
     APP.run ()
   except clip.ClipExit as e:

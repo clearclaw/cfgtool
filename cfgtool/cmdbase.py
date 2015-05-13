@@ -30,13 +30,16 @@ class CmdBase (CmdIO):
   @logtool.log_call
   def __init__ (self, kwargs):
     super (CmdBase, self).__init__ (kwargs)
-    self.report ("Module: %s" % kwargs["module"])
     self.re_var = re.compile (VARIABLE_REGEX)
     self.re_escvar = re.compile (ESCAPED_REGEX)
     self.kwargs = Dict (kwargs)
     self.conf = CONFIG
     self.belief = {}
     self.cfgfiles = []
+    self.report ("Module: %s" % kwargs["module"])
+    self.debug ("  work_dir: %s" % self.conf.work_dir)
+    self.debug ("  module_dir: %s" % self.conf.module_dir)
+    self.debug ("  belief_dir: %s" % self.conf.belief_dir)
     self.load_beliefs ()
     self.load_cfglist ()
 
@@ -45,6 +48,7 @@ class CmdBase (CmdIO):
     beliefs = [f for f in self.conf.belief_dir.glob (
       "*%s" % self.conf.belief_ext)]
     for fname in sorted (beliefs):
+      self.debug ("    belief: %s" % fname)
       try:
         self.belief.update (json.loads (file (fname).read ()))
       except Exception as e:
@@ -111,35 +115,32 @@ class CmdBase (CmdIO):
               except KeyError:
                 v = k
                 err += 1
-                self.error ("Undefined: ${%s}" % k)
+                self.error ("      Undefined: ${%s}" % k)
               line = pattern % (line[:m.start(0)], v, line[m.end(0):])
           out_file.write_text (line, append = True)
     return err
 
   @logtool.log_call
   def make_file (self, in_file, out_file):
-    if self.conf.backup and out_file.isfile ():
-      out_file.rename ("%s-backup.%s" % (out_file, self.conf.time_str))
+    if not self.conf.nobackup and out_file.isfile ():
+      fname = "%s%s.%s" % (out_file, self.conf.backup_ext, self.conf.time_str)
+      self.debug ("    Backup: %s -> %s" % (out_file, fname))
+      out_file.rename (fname)
     else:
       out_file.remove_p ()
     rc = self.instantiate_file (in_file, out_file)
     if rc:
-      self.error ("Failed.  Some variables were not defined.")
+      self.error ("    Failed.  Some variables were not defined.")
     return rc
 
   @logtool.log_call
   def compare_files (self, file1, file2):
-    cmd = "diff -q %s %s > /dev/null" % (file1, file2)
-    self.info ("      %s" % cmd)
-    rc = 0
-    try:
-      rc = subprocess.call (cmd, shell = True)
-      if rc < 0:
-        self.error ("        Compare terminated by signal: %s" % (-rc))
-      elif rc:
-        self.error ("        Compare failed: %s" % rc)
-    except OSError, e:
-      self.error ("Compare catastrophically failed: %s" % e)
+    hash1 = file1.read_hexhash ("md5")
+    hash2 = file2.read_hexhash ("md5")
+    self.debug ("      %s vs %s" % (hash1, hash2))
+    rc = hash1 != hash2
+    if rc:
+      self.error ("    Comparison failed: %s -> %s" % (file1, file2))
     return rc
 
   @logtool.log_call
@@ -151,7 +152,7 @@ class CmdBase (CmdIO):
     err = 0
     self.report ("  %s" % lable)
     for cfg in self.cfgfiles:
-      self.report ("    File: %s" % cfg)
+      self.report ("    File: %s" % cfg + out_ext)
       in_file = cfg + cfg_ext
       out_file = cfg + out_ext
       rc = func (in_file, out_file)
@@ -159,5 +160,5 @@ class CmdBase (CmdIO):
         err += 1
         self.error ("      Error in processing: %s" % in_file)
     if err:
-      self.error ("      %d files failed to process." % err)
+      self.error ("  %d files failed to process." % err)
     return err

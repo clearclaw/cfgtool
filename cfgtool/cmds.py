@@ -24,9 +24,11 @@ def check (module):
   name = "clean",
   description = "Remove old backups",
   inherits = OPTIONS)
+@clip.arg ("module", required = True,
+           help = "Module to process")
 @logtool.log_call
-def clean ():
-  implementation ("clean")
+def clean (module):
+  implementation ("clean", module = module)
 
 @app_main.subcommand (
   name = "sample",
