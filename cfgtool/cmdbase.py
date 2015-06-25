@@ -97,25 +97,24 @@ class CmdBase (CmdIO):
   def instantiate_file (self, in_file, out_file):
     err = 0
     with file (in_file) as file_in:
-      with open (out_file, "w") as file_out:
-        for line in file_in:
-          for pattern, re_pat in [("%s%s%s", self.re_var),
-                                  ("%s${%s}%s", self.re_escvar)]:
-            while True:
-              m = re_pat.search (line)
-              if not m:
-                break
-              # t = m.group (0) # Entire match
-              k = m.group (1) # Variable name
-              try:
-                v = self.get_belief (k) # Replacement token
-                self.debug ("      Mapped: ${%s} -> %s" % (k, v))
-              except KeyError:
-                v = k
-                err += 1
-                self.error ("      Undefined: ${%s}" % k)
-              line = pattern % (line[:m.start(0)], v, line[m.end(0):])
-          file_out.write_text (line, append = True)
+      for line in file_in:
+        for pattern, re_pat in [("%s%s%s", self.re_var),
+                                ("%s${%s}%s", self.re_escvar)]:
+          while True:
+            m = re_pat.search (line)
+            if not m:
+              break
+            # t = m.group (0) # Entire match
+            k = m.group (1) # Variable name
+            try:
+              v = self.get_belief (k) # Replacement token
+              self.debug ("      Mapped: ${%s} -> %s" % (k, v))
+            except KeyError:
+              v = k
+              err += 1
+              self.error ("      Undefined: ${%s}" % k)
+            line = pattern % (line[:m.start(0)], v, line[m.end(0):])
+        out_file.write_text (line, append = True)
     return err
 
   @logtool.log_call
