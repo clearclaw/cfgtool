@@ -16,8 +16,8 @@ COLOUR_VALUE = "green"
 class CmdIO (object):
 
   @logtool.log_call
-  def __init__ (self, *args, **kwargs):
-     self.conf = Dict ()
+  def __init__ (self, *args, **kwargs): # pylint: disable = W0613
+    self.conf = Dict ()
 
   @logtool.log_call
   def exit_if_forced (self, msg = None):

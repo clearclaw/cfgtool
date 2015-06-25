@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import clip, logging, logtool
+import logging, logtool
 from cfgtool.cmdbase import CmdBase
 
 LOG = logging.getLogger (__name__)

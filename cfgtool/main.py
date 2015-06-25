@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-import clip, logging, logtool, sys
+import clip, logging, logging.config, logtool, os, sys
 from functools import partial
-from socket import gethostname
 from addict import Dict
-from path import path
+from path import Path
 from configobj import ConfigObj
 
+logging.basicConfig (level = logging.INFO)
 LOG = logging.getLogger (__name__)
 
 APP = clip.App ()
@@ -36,11 +36,17 @@ def option_setopt (option, value):
   CONFIG[option] = value
 
 @logtool.log_call
+def option_version (opt): # pylint: disable = W0613
+  import cfgtool
+  print cfgtool.__version__
+  clip.exit ()
+
+@logtool.log_call
 def option_logging (flag):
-  logging.basicConfig (level = logging.DEBUG)
+  logging.root.setLevel (logging.DEBUG)
   CONFIG.debug = flag
 
-@APP.main (name = path (sys.argv[0]).basename (),
+@APP.main (name = Path (sys.argv[0]).basename (),
            description = "cfgtool",
            tree_view = "-H")
 @clip.flag ('-H', '--HELP', hidden = True, help = "Help for all sub-commands")
@@ -63,7 +69,8 @@ def option_logging (flag):
 @clip.opt ("-B", "--beliefdir",
            help = "Belief directory to use.",
            default = DEFAULT_WORKDIR + DEFAULT_BELIEFDIR, hidden = True,
-           inherit_only = True, callback = partial (option_setopt, "belief_dir"))
+           inherit_only = True,
+           callback = partial (option_setopt, "belief_dir"))
 @clip.flag ("-D", "--debug",
             help = "Enable debug logging",
             default = False, hidden = True, inherit_only = True,
@@ -80,22 +87,30 @@ def option_logging (flag):
             help = "Verbose output (see variable mappings)",
             default = False, hidden = True, inherit_only = True,
             callback = partial (option_setopt, "verbose"))
+@clip.flag ("-V", "--Version",
+            help = "Report installed version",
+            default = False, hidden = True, inherit_only = True,
+            callback = option_version)
 @logtool.log_call
 def app_main (*args, **kwargs): # pylint: disable = W0613
+  if os.geteuid () != 0: # Here so that help is available to non-root
+    LOG.error ("%s must be run as root", Path (sys.argv[0]).basename ())
+    sys.exit (1)
   if not sys.stdout.isatty ():
     option_setopt ("nocolour", True)
-  CONFIG.work_dir = path (CONFIG.get ("work_dir", DEFAULT_WORKDIR))
-  CONFIG.module_dir = path (CONFIG.get ("module_dir",
+  CONFIG.work_dir = Path (CONFIG.get ("work_dir", DEFAULT_WORKDIR))
+  CONFIG.module_dir = Path (CONFIG.get ("module_dir",
                                         CONFIG.work_dir / DEFAULT_MODULEDIR))
-  CONFIG.belief_dir = path (CONFIG.get ("belief_dir",
+  CONFIG.belief_dir = Path (CONFIG.get ("belief_dir",
                                         CONFIG.work_dir / DEFAULT_BELIEFDIR))
 
 @logtool.log_call
 def main ():
   try:
-    cfg = ConfigObj (DEFAULT_WORKDIR + DEFAULT_CONFIGFILE, interpolation = False)
+    cfg = ConfigObj (DEFAULT_WORKDIR + DEFAULT_CONFIGFILE,
+                     interpolation = False)
     CONFIG.update (dict (cfg))
-  except: # pylint: disable-msg = W0702
+  except: # pylint: disable = W0702
     print >> sys.stderr,  "Unable to parse configfile: %s" % DEFAULT_CONFIGFILE
     sys.exit (9)
   try:
@@ -109,4 +124,4 @@ def main ():
     sys.exit (3)
 
 if __name__ == "__main__":
-  main()
+  main ()

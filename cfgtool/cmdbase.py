@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
-import clip, importlib, itertools, json, logging, logtool
-import os, re, socket, subprocess, sys, termcolor
+import importlib, json, logging, logtool, re, socket
 from addict import Dict
-from socket import gethostname
-from path import path
+from path import Path
 from cfgtool.main import CONFIG, CmdError
 from cfgtool.cmdio import CmdIO
 
@@ -54,7 +52,7 @@ class CmdBase (CmdIO):
       except Exception as e:
         logtool.log_fault (e)
         self.error ("Error loading belief: %s -- %s" % (fname, e))
-        raise ValueErrr
+        raise ValueError
     self.belief.update ({
       "LOCAL_HOSTNAME": self.get_localhostname (),
       "LOCAL_STRTIME": self.conf.time_str,
@@ -66,7 +64,7 @@ class CmdBase (CmdIO):
     if e[0] == "/":
       e = e[1:]
     entry = self.conf.work_dir / e
-    fname = path ("%s%s" % (entry, self.conf.templ_ext))
+    fname = Path ("%s%s" % (entry, self.conf.templ_ext))
     if not fname.isfile ():
       self.error ("Template missing: %s" % fname)
       entry = None
@@ -80,7 +78,7 @@ class CmdBase (CmdIO):
       self.info ("    Missing: %s" % fname)
       raise CmdError
     files = [f.strip () for f in fname.lines () if f.strip ()[0] != "#"]
-    flist = map (self.template_check, files)
+    flist = map (self.template_check, files) # pylint: disable = W0141
     if None in flist:
       raise CmdError
     self.cfgfiles = [f for f in flist if f is not None]
@@ -117,7 +115,7 @@ class CmdBase (CmdIO):
                 err += 1
                 self.error ("      Undefined: ${%s}" % k)
               line = pattern % (line[:m.start(0)], v, line[m.end(0):])
-          out_file.write_text (line, append = True)
+          file_out.write_text (line, append = True)
     return err
 
   @logtool.log_call

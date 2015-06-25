@@ -2,7 +2,6 @@
 
 import clip, logging, logtool
 from cfgtool.cmdbase import CmdBase
-from cfgtool.cmd_check import Action
 
 LOG = logging.getLogger (__name__)
 
