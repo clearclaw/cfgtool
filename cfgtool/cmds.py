@@ -31,6 +31,16 @@ def clean (module):
   implementation ("clean", module = module)
 
 @app_main.subcommand (
+  name = "pyinstall",
+  description = "Install module's support files (requires --force)",
+  inherits = OPTIONS)
+@clip.arg ("module", required = True,
+           help = "Module to process")
+@logtool.log_call
+def pyinstall (module):
+  implementation ("pyinstall", module = module)
+
+@app_main.subcommand (
   name = "sample",
   description = "Generate sample configuration files",
   inherits = OPTIONS)

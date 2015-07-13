@@ -6,7 +6,7 @@ from addict import Dict
 from path import Path
 from configobj import ConfigObj
 
-logging.basicConfig (level = logging.INFO)
+logging.basicConfig (level = logging.WARN)
 LOG = logging.getLogger (__name__)
 
 APP = clip.App ()
