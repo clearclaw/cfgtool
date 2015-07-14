@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
-import importlib, json, logging, logtool, re, socket
+import importlib, json, logging, logtool, re, string, socket
 from addict import Dict
 from path import Path
 from cfgtool.main import CONFIG, CmdError
 from cfgtool.cmdio import CmdIO
 
 LOG = logging.getLogger (__name__)
-VARIABLE_REGEX = r"\$\{([A-Za-z0-9._]+)\}"
-ESCAPED_REGEX = r"\$\{\{([A-Za-z0-9._]+)\}\}"
+VARIABLE_REGEX = r"\$\{([A-Za-z0-9._:]+)\}"
+ESCAPED_REGEX = r"\$\{\{([A-Za-z0-9._:]+)\}\}"
 COLOUR_ERROR = "red"
 COLOUR_INFO = "white"
 COLOUR_INFO_BAD = "magenta"
@@ -26,7 +26,7 @@ def implementation (this, **kwargs):
 class CmdBase (CmdIO):
 
   @logtool.log_call
-  def __init__ (self, kwargs):
+  def __init__ (self, kwargs, module_not_present = False):
     super (CmdBase, self).__init__ (kwargs)
     self.re_var = re.compile (VARIABLE_REGEX)
     self.re_escvar = re.compile (ESCAPED_REGEX)
@@ -39,7 +39,8 @@ class CmdBase (CmdIO):
     self.debug ("  module_dir: %s" % self.conf.module_dir)
     self.debug ("  belief_dir: %s" % self.conf.belief_dir)
     self.load_beliefs ()
-    self.load_cfglist ()
+    if not module_not_present:
+      self.load_cfglist ()
 
   @logtool.log_call
   def load_beliefs (self):
@@ -89,9 +90,23 @@ class CmdBase (CmdIO):
 
   @logtool.log_call
   def get_belief (self, longkey):
-    keylist = longkey.split (".")
+    funcmap = {
+      ":lower": string.lower,
+      ":upper": string.upper,
+      ":capitalise": string.capitalize,
+      ":capitalize": string.capitalize,
+      ":swapcase": string.swapcase,
+    }
+    key = longkey
+    func = None
+    for k, v in funcmap.items ():
+      if longkey.endswith (k):
+        func = v
+        key = longkey[:-len (k)]
+        break
+    keylist = key.split (".")
     rc = reduce (lambda d, k: d[k], keylist, self.belief)
-    return rc
+    return rc if func is None else func (rc)
 
   @logtool.log_call
   def instantiate_file (self, in_file, out_file):

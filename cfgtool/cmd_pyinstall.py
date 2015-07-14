@@ -8,6 +8,10 @@ LOG = logging.getLogger (__name__)
 class Action (CmdBase):
 
   @logtool.log_call
+  def __init__ (self, kwargs):
+    super (Action, self).__init__ (kwargs, module_not_present = True)
+
+  @logtool.log_call
   def run (self):
     if not self.conf.force:
       self.error ("  Must force installs (--force).")
