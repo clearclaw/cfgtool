@@ -26,6 +26,7 @@ class Action (CmdBase):
                   % self.kwargs.module)
       clip.exit (err = True)
     try:
+      self.debug ("  Running: %s" % fname)
       subprocess.check_call ([fname,],
                              cwd = fpath,
                              shell = True,
