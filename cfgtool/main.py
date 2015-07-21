@@ -22,6 +22,7 @@ CONFIG = Dict ({
   "belief_ext": ".json",
   "backup_ext": "-backup",
   "check_ext": "-check",
+  "notroot": False,
   "out_ext": "",
   "sample_ext": ".sample",
   "time_ut": PROCESS_UTTIME,
@@ -91,10 +92,16 @@ def option_logging (flag):
             help = "Report installed version",
             default = False, hidden = True, inherit_only = True,
             callback = option_version)
+@clip.flag ("-N", "--notroot",
+            help = "Allow running as non-root",
+            default = False, hidden = True, inherit_only = True,
+            callback = partial (option_setopt, "notroot"))
 @logtool.log_call
 def app_main (*args, **kwargs): # pylint: disable = W0613
-  if os.geteuid () != 0: # Here so that help is available to non-root
-    LOG.error ("%s must be run as root", Path (sys.argv[0]).basename ())
+  if not CONFIG.notroot and os.geteuid () != 0:
+    # Here so that help is available to non-root
+    LOG.error ("%s must be run as root (or use --notroot)",
+               Path (sys.argv[0]).basename ())
     sys.exit (1)
   if not sys.stdout.isatty ():
     option_setopt ("nocolour", True)
