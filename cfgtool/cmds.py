@@ -6,7 +6,7 @@ from cfgtool.cmdbase import implementation
 
 LOG = logging.getLogger (__name__)
 OPTIONS = ["help", "workdir", "moduledir", "beliefdir", "nobackup", "debug",
-               "force", "nocolour", "quiet", "verbose", "noroot",]
+               "force", "nocolour", "quiet", "verbose", "notroot",]
 
 @app_main.subcommand (
   name = "check",
