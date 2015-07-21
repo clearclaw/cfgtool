@@ -147,6 +147,12 @@ class CmdBase (CmdIO):
 
   @logtool.log_call
   def compare_files (self, file1, file2):
+    if not file1.isfile ():
+      self.error ("    Comparison failed: %s is missing" % file1)
+      return True
+    if not file2.isfile ():
+      self.error ("    Comparison failed: %s is missing" % file2)
+      return True
     hash1 = file1.read_hexhash ("md5")
     hash2 = file2.read_hexhash ("md5")
     self.debug ("      %s vs %s" % (hash1, hash2))
