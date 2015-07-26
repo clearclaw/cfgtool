@@ -50,36 +50,40 @@ def option_logging (flag):
 @APP.main (name = Path (sys.argv[0]).basename (),
            description = "cfgtool",
            tree_view = "-H")
-@clip.flag ('-H', '--HELP', hidden = True, help = "Help for all sub-commands")
+@clip.flag ('-H', '--HELP', hidden = True, help = "Show all sub-commands")
 @clip.flag ("-b", "--nobackup",
             help = "Disable backups of touched files",
             default = False, hidden = True, inherit_only = True,
             callback = partial (option_setopt, "nobackup"))
-@clip.flag ("-f", "--force", help = "Don't stop at errors",
-            default = False, hidden = True, inherit_only = True,
-            callback = partial (option_setopt, "force"))
-@clip.opt ("-W", "--workdir",
-           help = "Working root directory to use.",
-           default = DEFAULT_WORKDIR, hidden = True, inherit_only = True,
-           callback = partial (option_setopt, "work_dir"))
-@clip.opt ("-M", "--moduledir",
-           help = "Module directory to use.",
-           default = DEFAULT_WORKDIR + DEFAULT_MODULEDIR, hidden = True,
-           inherit_only = True,
-           callback = partial (option_setopt, "module_dir"))
 @clip.opt ("-B", "--beliefdir",
            help = "Belief directory to use.",
            default = DEFAULT_WORKDIR + DEFAULT_BELIEFDIR, hidden = True,
            inherit_only = True,
            callback = partial (option_setopt, "belief_dir"))
-@clip.flag ("-D", "--debug",
-            help = "Enable debug logging",
-            default = False, hidden = True, inherit_only = True,
-            callback = option_logging)
 @clip.flag ("-C", "--nocolour",
             help = "Suppress colours in reports",
             default = False, hidden = True, inherit_only = True,
             callback = partial (option_setopt, "nocolour"))
+@clip.flag ("-D", "--debug",
+            help = "Enable debug logging",
+            default = False, hidden = True, inherit_only = True,
+            callback = option_logging)
+@clip.flag ("-f", "--force", help = "Don't stop at errors",
+            default = False, hidden = True, inherit_only = True,
+            callback = partial (option_setopt, "force"))
+@clip.opt ("-M", "--moduledir",
+           help = "Module directory to use.",
+           default = DEFAULT_WORKDIR + DEFAULT_MODULEDIR, hidden = True,
+           inherit_only = True,
+           callback = partial (option_setopt, "module_dir"))
+@clip.flag ("-N", "--notroot",
+            help = "Allow running as non-root",
+            default = False, hidden = True, inherit_only = True,
+            callback = partial (option_setopt, "notroot"))
+@clip.opt ("-W", "--workdir",
+           help = "Working root directory to use.",
+           default = DEFAULT_WORKDIR, hidden = True, inherit_only = True,
+           callback = partial (option_setopt, "work_dir"))
 @clip.flag ("-q", "--quiet",
             help = "Suppress output",
             default = False, hidden = True, inherit_only = True,
@@ -92,10 +96,6 @@ def option_logging (flag):
             help = "Report installed version",
             default = False, hidden = True, inherit_only = True,
             callback = option_version)
-@clip.flag ("-N", "--notroot",
-            help = "Allow running as non-root",
-            default = False, hidden = True, inherit_only = True,
-            callback = partial (option_setopt, "notroot"))
 @logtool.log_call
 def app_main (*args, **kwargs): # pylint: disable = W0613
   if not CONFIG.notroot and os.geteuid () != 0:
