@@ -30,7 +30,7 @@ setup (
     author = "J C Lawrence",
     author_email = "claw@kanga.nu",
     url = "https://pypi.python.org/pypi/cfgtool",
-    license = "Creative Commons Attribution-ShareAlike 3.0 Unported",
+    license = "LGPL v3.0",
     packages = find_packages (exclude = ["tests",]),
     package_data = {
     },
