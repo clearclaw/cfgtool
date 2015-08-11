@@ -1,30 +1,14 @@
 #! /usr/bin/env python
 
-try:
-  import pyver # pylint: disable=W0611
-except ImportError:
-  import os, subprocess
-  try:
-    environment = os.environ.copy()
-    cmd = "pip install pyver".split (" ")
-    subprocess.check_call (cmd, env = environment)
-  except subprocess.CalledProcessError:
-    import sys
-    print >> sys.stderr, "Problem installing 'pyver' dependency."
-    print >> sys.stderr, "Please install pyver manually."
-    sys.exit (1)
-  import pyver # pylint: disable=W0611
-
 from setuptools import setup, find_packages
-
-__version__, __version_info__ = pyver.get_version (pkg = "cfgtool",
-                                                   public = True)
+import versioneer
 
 setup (
     name = "cfgtool",
-    version = __version__,
+    version = versioneer.get_version (),
     description = "Cfgtool configuration management",
     long_description = file ("README.rst").read (),
+    cmdclass = versioneer.get_cmdclass (),
     classifiers = [],
     keywords = "configuration management",
     author = "J C Lawrence",
