@@ -1,8 +1,9 @@
 #! /usr/bin/env python
 
+from __future__ import absolute_import
 import clip, logging, logtool
-from cfgtool.main import app_main, CONFIG
-from cfgtool.cmdbase import implementation
+from .main import app_main, CONFIG
+from .cmdbase import implementation
 
 LOG = logging.getLogger (__name__)
 OPTIONS = ["help", "workdir", "moduledir", "beliefdir", "nobackup", "debug",
