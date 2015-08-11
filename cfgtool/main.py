@@ -5,6 +5,7 @@ from functools import partial
 from addict import Dict
 from path import Path
 from configobj import ConfigObj
+import cfgtool, cfgtool.cmds # pylint: disable=W0611
 
 logging.basicConfig (level = logging.WARN)
 LOG = logging.getLogger (__name__)
@@ -38,7 +39,6 @@ def option_setopt (option, value):
 
 @logtool.log_call
 def option_version (opt): # pylint: disable = W0613
-  import cfgtool
   print cfgtool.__version__
   clip.exit ()
 
