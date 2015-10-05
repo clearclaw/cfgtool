@@ -18,6 +18,14 @@ COLOUR_FIELDNAME = "cyan"
 COLOUR_VALUE = "green"
 
 @logtool.log_call
+def is_iterable (i):
+  try:
+    iter (i)
+    return True
+  except TypeError:
+    return False
+
+@logtool.log_call
 def implementation (this, **kwargs):
   cmd = importlib.import_module ("cfgtool.cmd_%s" % this)
   item = getattr (cmd, "Action")
@@ -43,17 +51,47 @@ class CmdBase (CmdIO):
       self.load_cfglist ()
 
   @logtool.log_call
-  def load_beliefs (self):
-    beliefs = [f for f in self.conf.belief_dir.glob (
+  def load_beliefs_file (self, target, fname):
+    self.debug ("    belief: %s" % fname)
+    try:
+      target.update (json.loads (file (fname).read ()))
+    except Exception as e:
+      logtool.log_fault (e)
+      self.error ("Error loading belief: %s -- %s" % (fname, e))
+      raise ValueError
+
+  @logtool.log_call
+  def load_beliefs_dir (self, target, directory):
+    files = [f for f in directory.glob (
       "*%s" % self.conf.belief_ext)]
-    for fname in sorted (beliefs):
-      self.debug ("    belief: %s" % fname)
-      try:
-        self.belief.update (json.loads (file (fname).read ()))
-      except Exception as e:
-        logtool.log_fault (e)
-        self.error ("Error loading belief: %s -- %s" % (fname, e))
-        raise ValueError
+    for fname in sorted (files):
+      self.load_beliefs_file (target, fname)
+
+  @logtool.log_call
+  def load_beliefs_dirs (self, target, dirs):
+    if not isinstance (dirs, str) and is_iterable (dirs):
+      for d in dirs:
+        self.load_beliefs_dir (target, d)
+    else:
+      self.load_beliefs_dir (target, dirs)
+
+  @logtool.log_call
+  def load_beliefs (self):
+    self.load_beliefs_dir (self.belief, self.conf.belief_dir)
+    if self.kwargs.module:
+      target = self.belief[self.kwargs.module]
+      if target.belief_directory:
+        self.load_beliefs_dirs (target, target.belief_directory)
+      if target.belief_file:
+        self.load_beliefs_file (target, target.belief_file)
+    else: # load all remotes
+      for k, v in self.belief.items ():
+        if isinstance (v, dict):
+          target = self.belief[k]
+          if "belief_directory" in v:
+            self.load_beliefs_dirs (target, target.belief_directory)
+          if "belief_file" in v:
+            self.load_beliefs_file (target, target.belief_file)
     self.belief.update ({
       "LOCAL_HOSTNAME": self.get_localhostname (),
       "LOCAL_STRTIME": self.conf.time_str,
