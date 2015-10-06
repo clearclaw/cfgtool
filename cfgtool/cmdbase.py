@@ -40,9 +40,9 @@ class CmdBase (CmdIO):
     self.re_escvar = re.compile (ESCAPED_REGEX)
     self.kwargs = Dict (kwargs)
     self.conf = CONFIG
-    self.belief = {}
+    self.belief = Dict ()
     self.cfgfiles = []
-    self.report ("Module: %s" % kwargs["module"])
+    self.info ("Module: %s" % kwargs["module"])
     self.debug ("  work_dir: %s" % self.conf.work_dir)
     self.debug ("  module_dir: %s" % self.conf.module_dir)
     self.debug ("  belief_dir: %s" % self.conf.belief_dir)
