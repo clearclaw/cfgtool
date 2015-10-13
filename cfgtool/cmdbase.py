@@ -89,7 +89,7 @@ class CmdBase (CmdIO):
         if isinstance (v, dict):
           target = self.belief[k]
           if "belief_directory" in v:
-            self.load_belief_dirs (target, target["belief_directory"})
+            self.load_belief_dirs (target, target["belief_directory"])
           if "belief_file" in v:
             self.load_belief_file (target, target["belief_file"])
     self.belief.update ({
