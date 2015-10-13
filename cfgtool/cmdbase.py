@@ -40,7 +40,7 @@ class CmdBase (CmdIO):
     self.re_escvar = re.compile (ESCAPED_REGEX)
     self.kwargs = Dict (kwargs)
     self.conf = CONFIG
-    self.belief = Dict ()
+    self.belief = {}
     self.cfgfiles = []
     self.info ("Module: %s" % kwargs["module"])
     self.debug ("  work_dir: %s" % self.conf.work_dir)
@@ -80,18 +80,18 @@ class CmdBase (CmdIO):
     self.load_belief_dir (self.belief, self.conf.belief_dir)
     if self.kwargs.module:
       target = self.belief[self.kwargs.module]
-      if target.belief_directory:
-        self.load_belief_dirs (target, target.belief_directory)
+      if "belief_directory" in target:
+        self.load_belief_dirs (target, target["belief_directory"])
       if "belief_file" in target:
-        self.load_belief_file (target, target.belief_file)
+        self.load_belief_file (target, target["belief_file"}])
     else: # load all remotes
       for k, v in self.belief.items ():
         if isinstance (v, dict):
           target = self.belief[k]
           if "belief_directory" in v:
-            self.load_belief_dirs (target, target.belief_directory)
+            self.load_belief_dirs (target, target["belief_directory"})
           if "belief_file" in v:
-            self.load_belief_file (target, target.belief_file)
+            self.load_belief_file (target, target["belief_file"])
     self.belief.update ({
       "LOCAL_HOSTNAME": self.get_localhostname (),
       "LOCAL_STRTIME": self.conf.time_str,
