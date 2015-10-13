@@ -62,7 +62,7 @@ class CmdBase (CmdIO):
 
   @logtool.log_call
   def load_beliefs_dir (self, target, directory):
-    files = [f for f in directory.glob (
+    files = [f for f in Path (directory).glob (
       "*%s" % self.conf.belief_ext)]
     for fname in sorted (files):
       self.load_beliefs_file (target, fname)
