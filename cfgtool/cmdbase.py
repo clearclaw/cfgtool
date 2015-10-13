@@ -83,7 +83,7 @@ class CmdBase (CmdIO):
       if "belief_directory" in target:
         self.load_belief_dirs (target, target["belief_directory"])
       if "belief_file" in target:
-        self.load_belief_file (target, target["belief_file"}])
+        self.load_belief_file (target, target["belief_file"])
     else: # load all remotes
       for k, v in self.belief.items ():
         if isinstance (v, dict):
