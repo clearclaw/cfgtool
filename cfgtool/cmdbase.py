@@ -79,7 +79,7 @@ class CmdBase (CmdIO):
   def load_belief (self):
     self.load_belief_dir (self.belief, self.conf.belief_dir)
     if self.kwargs.module:
-      target = self.belief[self.kwargs.module]
+      target = self.belief.get (self.kwargs.module, {})
       if "belief_directory" in target:
         self.load_belief_dirs (target, target["belief_directory"])
       if "belief_file" in target:
