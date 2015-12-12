@@ -39,7 +39,7 @@ def option_setopt (option, value):
 
 @logtool.log_call
 def option_version (opt): # pylint: disable = W0613
-  print __version__
+  print (__version__)
   clip.exit ()
 
 @logtool.log_call
@@ -118,7 +118,8 @@ def main ():
                      interpolation = False)
     CONFIG.update (dict (cfg))
   except: # pylint: disable = W0702
-    print >> sys.stderr,  "Unable to parse configfile: %s" % DEFAULT_CONFIGFILE
+    print ("Unable to parse config file: %s" % DEFAULT_CONFIGFILE,
+                                                file = sys.stderr)
     sys.exit (9)
   try:
     APP.run ()

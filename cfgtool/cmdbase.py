@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import importlib, json, logging, logtool, re, string, socket
+import importlib, json, logging, logtool, re, six, string, socket
 from addict import Dict
 from path import Path
 from cfgtool.main import CONFIG, CmdError
@@ -69,7 +69,7 @@ class CmdBase (CmdIO):
 
   @logtool.log_call
   def load_belief_dirs (self, target, dirs):
-    if not isinstance (dirs, basestring) and is_iterable (dirs):
+    if not isinstance (dirs, six.string_types) and is_iterable (dirs):
       for d in dirs:
         self.load_belief_dir (target, d)
     else:
@@ -117,7 +117,7 @@ class CmdBase (CmdIO):
       self.info ("    Missing: %s" % fname)
       raise CmdError
     files = [f.strip () for f in fname.lines () if f.strip ()[0] != "#"]
-    flist = map (self.template_check, files) # pylint: disable = W0141
+    flist = list (map (self.template_check, files)) # pylint: disable = W0141
     if None in flist:
       raise CmdError
     self.cfgfiles = [f for f in flist if f is not None]

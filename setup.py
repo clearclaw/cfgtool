@@ -2,12 +2,13 @@
 
 from setuptools import setup, find_packages
 import versioneer
+from io import open
 
 setup (
     name = "cfgtool",
     version = versioneer.get_version (),
     description = "Cfgtool configuration management",
-    long_description = file ("README.rst").read (),
+    long_description = open ("README.rst", "r", encoding = "utf-8").read (),
     cmdclass = versioneer.get_cmdclass (),
     classifiers = [],
     keywords = "configuration management",
@@ -20,7 +21,8 @@ setup (
     },
     zip_safe = True,
     install_requires = [line.strip ()
-                        for line in file ("requirements.txt").readlines ()],
+                        for line in open ("requirements.txt", "r",
+                                    encoding="utf-8").readlines ()],
     entry_points = {
         "console_scripts": [
             "cfgtool = cfgtool.main:main",
