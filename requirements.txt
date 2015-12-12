@@ -3,5 +3,6 @@ clip.py
 configobj
 logtool
 path.py
+six
 termcolor
 
