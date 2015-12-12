@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import clip, logging, logging.config, logtool, os, sys
 from functools import partial
 from addict import Dict
@@ -119,7 +120,7 @@ def main ():
     CONFIG.update (dict (cfg))
   except: # pylint: disable = W0702
     print ("Unable to parse config file: %s" % DEFAULT_CONFIGFILE,
-                                                file = sys.stderr)
+           file = sys.stderr)
     sys.exit (9)
   try:
     APP.run ()

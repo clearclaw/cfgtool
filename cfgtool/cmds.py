@@ -19,7 +19,7 @@ OPTIONS = ["help", "workdir", "moduledir", "beliefdir", "nobackup", "debug",
 def belief (**kwargs):
   rc = 0
   if kwargs.get ("module"):
-      rc += implementation ("belief", **kwargs)
+    rc += implementation ("belief", **kwargs)
   else:
     for module in sorted ([f.basename ()
                            for f in CONFIG.module_dir.glob ("*")]):
