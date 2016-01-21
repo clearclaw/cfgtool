@@ -45,7 +45,7 @@ We can change the locations of our `module.d` and `belief.d` directory in our `c
 
 ```
 belief_dir = "/my/new/belief/dir/..."
-module_dir = "/my/new/module/dir/.."
+module_dir = "/my/new/module/dir/..."
 ```
 
 ## An example
@@ -342,7 +342,6 @@ Now say for example we install another application called `uploader` which takes
 ```json
 {
 	"uploader": {
-    	...
         "aws_secret_key": "..."
 	}
 }
