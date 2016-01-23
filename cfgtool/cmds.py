@@ -14,7 +14,9 @@ OPTIONS = ["help", "workdir", "moduledir", "beliefdir", "nobackup", "debug",
   description = "Report the belief for a module(s)",
   inherits = OPTIONS)
 @clip.arg ("module", required = False,
-           help = "Module to report beliefs for")
+           help = "Module to report beliefs for (optional)")
+@clip.arg ("belief", required = False,
+           help = "Name of belief to report (optional)")
 @logtool.log_call
 def belief (**kwargs):
   rc = 0
@@ -23,7 +25,7 @@ def belief (**kwargs):
   else:
     for module in sorted ([f.basename ()
                            for f in CONFIG.module_dir.glob ("*")]):
-      rc += implementation ("belief", module = module)
+      rc += implementation ("belief", module = module, **kwargs)
   if rc:
     clip.exit (err = True)
 
