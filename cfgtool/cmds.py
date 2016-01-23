@@ -63,8 +63,8 @@ def clean (module):
   "out_file", required = False,
   help = "Output file to write (optional, '=' removes last extension)")
 @logtool.log_call
-def process (module, **kwargs):
-  implementation ("process", module = module, **kwargs)
+def process (**kwargs):
+  implementation ("process", **kwargs)
 
 @app_main.subcommand (
   name = "pyinstall",

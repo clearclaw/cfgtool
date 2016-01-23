@@ -207,7 +207,7 @@ class CmdBase (CmdIO):
 
   @logtool.log_call
   def process_one_file (self, in_file, out_file, func):
-    self.report ("    File: %s" % out_file)
+    self.info ("    File: %s" % out_file)
     if func (in_file, out_file):
       self.error ("      Error in processing: %s" % in_file)
       return 1

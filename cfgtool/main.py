@@ -82,8 +82,8 @@ def option_logging (flag):
             help = "Allow running as non-root",
             default = False, hidden = True, inherit_only = True,
             callback = partial (option_setopt, "notroot"))
-@clip.flag ("-o", "--only_data",
-            help = "Suppress informational output",
+@clip.flag ("-O", "--only_data",
+            help = "Suppress information output",
             default = False, hidden = True, inherit_only = True,
             callback = partial (option_setopt, "only"))
 @clip.opt ("-W", "--workdir",
