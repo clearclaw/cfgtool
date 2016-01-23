@@ -7,7 +7,7 @@ from .cmdbase import implementation
 
 LOG = logging.getLogger (__name__)
 OPTIONS = ["help", "workdir", "moduledir", "beliefdir", "nobackup", "debug",
-           "force", "nocolour", "quiet", "verbose", "notroot",]
+           "force", "nocolour", "quiet", "verbose", "notroot", "only_data",]
 
 @app_main.subcommand (
   name = "belief",
