@@ -34,23 +34,23 @@ class CmdIO (object):
 
   @logtool.log_call
   def debug (self, msg):
-    if not self.conf.quiet and self.conf.verbose:
+    if not self.conf.quiet and not self.conf.only and self.conf.verbose:
       clip.echo (self.colourise (msg, COLOUR_DEBUG))
 
   @logtool.log_call
   def info (self, msg, err = False):
-    if not self.conf.quiet:
+    if not self.conf.quiet and self.conf.only:
       clip.echo (self.colourise (msg,
                                  COLOUR_INFO if not err else COLOUR_INFO_BAD))
 
   @logtool.log_call
   def error (self, msg):
-    if not self.conf.quiet:
+    if not self.conf.quiet and not self.conf.only:
       clip.echo (self.colourise (msg, COLOUR_ERROR))
 
   @logtool.log_call
   def warn (self, msg):
-    if not self.conf.quiet:
+    if not self.conf.quiet and not self.conf.only:
       clip.echo (self.colourise ("WARNING: " + msg, COLOUR_WARN))
 
   @logtool.log_call

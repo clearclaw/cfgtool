@@ -25,6 +25,7 @@ CONFIG = Dict ({
   "backup_ext": "-backup",
   "check_ext": "-check",
   "notroot": False,
+  "only": False,
   "out_ext": "",
   "sample_ext": ".sample",
   "time_ut": PROCESS_UTTIME,
@@ -81,6 +82,10 @@ def option_logging (flag):
             help = "Allow running as non-root",
             default = False, hidden = True, inherit_only = True,
             callback = partial (option_setopt, "notroot"))
+@clip.flag ("-o", "--only_data",
+            help = "Suppress informational output",
+            default = False, hidden = True, inherit_only = True,
+            callback = partial (option_setopt, "only"))
 @clip.opt ("-W", "--workdir",
            help = "Working root directory to use.",
            default = DEFAULT_WORKDIR, hidden = True, inherit_only = True,
