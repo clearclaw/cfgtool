@@ -39,7 +39,7 @@ class CmdIO (object):
 
   @logtool.log_call
   def info (self, msg, err = False):
-    if not self.conf.quiet and self.conf.only:
+    if not self.conf.quiet and not self.conf.only:
       clip.echo (self.colourise (msg,
                                  COLOUR_INFO if not err else COLOUR_INFO_BAD))
 

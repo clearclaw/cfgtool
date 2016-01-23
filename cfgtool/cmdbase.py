@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import importlib, json, logging, logtool, re, six, string, socket
+import atomictempfile, importlib, json, logging, logtool, re
+import six, string, socket
 from addict import Dict
 from path import Path
 from cfgtool.main import CONFIG, CmdError
@@ -178,7 +179,8 @@ class CmdBase (CmdIO):
       out_file.rename (fname)
     else:
       out_file.remove_p ()
-    rc = self.instantiate_file (in_file, out_file)
+    with atomictempfile.AtomicTempFile (out_file) as fname:
+      rc = self.instantiate_file (in_file, Path (fname.name))
     if rc:
       self.error ("    Failed.  Some variables were not defined.")
     return rc
@@ -204,17 +206,21 @@ class CmdBase (CmdIO):
     pass
 
   @logtool.log_call
+  def process_one_file (self, in_file, out_file, func):
+    self.report ("    File: %s" % out_file)
+    if func (in_file, out_file):
+      self.error ("      Error in processing: %s" % in_file)
+      return 1
+    return 0
+
+  @logtool.log_call
   def process_cfgs (self, lable, cfg_ext, out_ext, func):
     err = 0
-    self.report ("  %s" % lable)
+    self.info ("  %s" % lable)
     for cfg in self.cfgfiles:
-      self.report ("    File: %s" % cfg + out_ext)
       in_file = cfg + cfg_ext
       out_file = cfg + out_ext
-      rc = func (in_file, out_file)
-      if rc:
-        err += 1
-        self.error ("      Error in processing: %s" % in_file)
+      err += self.process_one_file (in_file, out_file, func)
     if err:
       self.error ("  %d files failed to process." % err)
     return err

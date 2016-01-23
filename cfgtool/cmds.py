@@ -52,6 +52,21 @@ def clean (module):
   implementation ("clean", module = module)
 
 @app_main.subcommand (
+  name = "process",
+  description = "Process file as part of the module",
+  inherits = OPTIONS)
+@clip.arg ("module", required = True,
+           help = "Module to process")
+@clip.arg ("in_file", required = True,
+           help = "Template file to process")
+@clip.arg (
+  "out_file", required = False,
+  help = "Output file to write (optional, '=' removes last extension)")
+@logtool.log_call
+def process (module, **kwargs):
+  implementation ("process", module = module, **kwargs)
+
+@app_main.subcommand (
   name = "pyinstall",
   description = "Install module's support files (requires --force)",
   inherits = OPTIONS)
