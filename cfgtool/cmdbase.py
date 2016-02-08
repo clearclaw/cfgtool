@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 import atomictempfile, importlib, json, logging, logtool, re
-import six, string, socket
+import six, socket
+from io import open
 from addict import Dict
 from path import Path
 from cfgtool.main import CONFIG, CmdError
 from cfgtool.cmdio import CmdIO
+from functools import reduce
 
 LOG = logging.getLogger (__name__)
 VARIABLE_REGEX = r"\$\{([A-Za-z0-9._:]+)\}"
@@ -55,7 +57,7 @@ class CmdBase (CmdIO):
   def load_belief_file (self, target, fname):
     self.debug ("    belief: %s" % fname)
     try:
-      target.update (json.loads (file (fname).read ()))
+      target.update (json.loads (open (fname, encoding = 'utf-8').read ()))
     except Exception as e:
       logtool.log_fault (e)
       self.error ("Error loading belief: %s -- %s" % (fname, e))
@@ -130,11 +132,11 @@ class CmdBase (CmdIO):
   @logtool.log_call
   def get_belief (self, longkey):
     funcmap = {
-      ":lower": string.lower,
-      ":upper": string.upper,
-      ":capitalise": string.capitalize,
-      ":capitalize": string.capitalize,
-      ":swapcase": string.swapcase,
+      ":lower": six.text_type.lower,
+      ":upper": six.text_type.upper,
+      ":capitalise": six.text_type.capitalize,
+      ":capitalize": six.text_type.capitalize,
+      ":swapcase": six.text_type.swapcase,
     }
     key = longkey
     func = None
@@ -150,7 +152,7 @@ class CmdBase (CmdIO):
   @logtool.log_call
   def instantiate_file (self, in_file, out_file):
     err = 0
-    with file (in_file) as file_in:
+    with open (in_file, encoding = 'utf-8') as file_in:
       for line in file_in:
         for pattern, re_pat in [("%s%s%s", self.re_var),
                                 ("%s${%s}%s", self.re_escvar)]:
