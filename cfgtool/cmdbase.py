@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 import atomictempfile, importlib, json, logging, logtool, re
-import six, socket
-from io import open
+import shutil, six, socket
+from io import open # pylint: disable=redefined-builtin
 from addict import Dict
 from path import Path
 from cfgtool.main import CONFIG, CmdError
 from cfgtool.cmdio import CmdIO
-from functools import reduce
+from functools import reduce # pylint: disable=redefined-builtin
 
 LOG = logging.getLogger (__name__)
 VARIABLE_REGEX = r"\$\{([A-Za-z0-9._:]+)\}"
@@ -183,6 +183,7 @@ class CmdBase (CmdIO):
       out_file.remove_p ()
     with atomictempfile.AtomicTempFile (out_file) as fname:
       rc = self.instantiate_file (in_file, Path (fname.name))
+    shutil.copymode (in_file, out_file)
     if rc:
       self.error ("    Failed.  Some variables were not defined.")
     return rc
