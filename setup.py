@@ -8,7 +8,7 @@ setup (
     name = "cfgtool",
     version = versioneer.get_version (),
     description = "Cfgtool configuration management",
-    long_description = open ("README.rst", "r", encoding = "utf-8").read (),
+    long_description = open ("README.md", "r", encoding = "utf-8").read (),
     cmdclass = versioneer.get_cmdclass (),
     classifiers = [],
     keywords = "configuration management",
