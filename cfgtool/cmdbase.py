@@ -53,11 +53,29 @@ class CmdBase (CmdIO):
     if not module_not_present:
       self.load_cfglist ()
 
+  # http://stackoverflow.com/questions/7204805/dictionaries-of-dictionaries-merge
+  @logtool.log_call
+  def _mergedicts (self, a, b, path = None):
+    "merges b into a"
+    if path is None: path = []
+    for key in b:
+      if key in a:
+        if isinstance (a[key], dict) and isinstance (b[key], dict):
+            self._mergedicts (a[key], b[key], path + [str (key)])
+        elif a[key] == b[key]:
+          pass # same leaf value
+        else:
+          raise Exception ("Conflict at %s" % ".".join (path + [str (key)]))
+      else:
+        a[key] = b[key]
+    return a
+
   @logtool.log_call
   def load_belief_file (self, target, fname):
     self.debug ("    belief: %s" % fname)
     try:
-      target.update (json.loads (open (fname, encoding = 'utf-8').read ()))
+      n = json.loads (open (fname, encoding = "utf-8").read ())
+      target = self._mergedicts (target, n)
     except Exception as e:
       logtool.log_fault (e)
       self.error ("Error loading belief: %s -- %s" % (fname, e))
@@ -152,7 +170,7 @@ class CmdBase (CmdIO):
   @logtool.log_call
   def instantiate_file (self, in_file, out_file):
     err = 0
-    with open (in_file, encoding = 'utf-8') as file_in:
+    with open (in_file, encoding = "utf-8") as file_in:
       for line in file_in:
         for pattern, re_pat in [("%s%s%s", self.re_var),
                                 ("%s${%s}%s", self.re_escvar)]:
